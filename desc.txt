@@ -1,0 +1,30 @@
+
+
+
+*		Charybdis.App -
+	Alle Kompatibilitätsfeatueres, die nicht direkt in der UI behandelt werden müssen.
+	
+*		Charybdis.Objects -
+	Das grundlegende Objekt-System mit verschiedenen abstrakten Typen, die an anderen Stellen
+	implementiert werden.
+	
+* 		Charybdis.Services -
+	Services sind Runtime-Prozesse, die innerhalb der Applikation laufen und dauerhaft bestehen müssen. Zum Beispiel
+	wird der Preloader ein Service sein.
+	
+* 		Charybdis.Kernel -
+	Der Runtime-Kernel steuert alle aktiven Services und verwaltet sie.
+	
+*		Charybdis.Events -
+	Die globalen Event-Typen mit abstrakten grundlegenden Funktionen um Events entsprechend zu behandeln. Außerdem
+	diverse Listener und eine abstrakte Event-Listener Klasse.
+	
+*		Charybdis.Plugins -
+	Das Plugin-System sorgt für die gebrauchte Unabhängigkeit und garantiert dass das System in vielen Kern-Stellen
+	erweiterbar ist.
+	
+*		Charybdis.Graphics -
+	Die abstrakte Basis-API für den Zugriff auf bestimmte Grafik-APIs wie Canvas/WebGl.
+	
+*		Charybdis.Local -
+	Ein System um die Applikation mühelos für andere Sprache zu lokalisieren.
