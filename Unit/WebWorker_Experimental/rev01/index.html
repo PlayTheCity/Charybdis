@@ -1,0 +1,48 @@
+
+<html>
+ <head>
+  <title>Charybdis Experimental WebWorkers Rev01</title>
+ </head>
+ 
+<script src = "worker2.js" /> </script>
+<script>
+
+	function webWorker()
+	{
+	document.write('  <b>The result of the ackermann-function is</b>: <div id = "result" /> </div>');
+	var worker = new Worker('worker.js')
+        //var m = document.getElementById('m').value;
+        //var n = document.getElementById('n').value; 	
+	worker.onmessage = function(event) {
+		document.getElementById('result').textContent = event.data;
+	};
+	//worker.postMessage( { 'm' : m, 'n' : n  } );
+	}
+
+	function nonWorker()
+	{
+	alert('hh');
+        document.write('  <b>The result of the ackermann-function is</b>: <div id = "result" /> </div>' );
+	//var m = document.getElementById('m').value;
+	//var n = document.getElementById('n').value;	
+	document.getElementById('result').textContent = ackermann2(4,4);
+
+	 }
+</script>
+
+ <body>
+  <h1> Web Workers Example with Ackermann-Function </h1> 
+  <hr> <br/> <br/> <br/>
+   <form>
+	N: <input id = 'n' type="text" name="n" /> <br/>
+        M: <input id = 'm' type="text" name="m" /> <br/>
+   </form> 
+
+    <input type="button" name="Webworker button" value="Calc with Workers"
+      onclick="webWorker()">
+    <input type="button" name="button" value = "Calc without Workers" 
+	onclick=""nonWorker()">
+ </body>
+</html>
+
+
