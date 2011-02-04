@@ -4,30 +4,30 @@
   <title>Charybdis Experimental WebWorkers Rev01</title>
  </head>
  
-<script src = "worker2.js" /> </script>
-<script>
+<script type = "text/javascript"  src = "ack.js" /> </script>
+<script type = "text/javascript" >
 
 	function webWorker()
 	{
-	document.write('  <b>The result of the ackermann-function is</b>: <div id = "result" /> </div>');
-	var worker = new Worker('worker.js')
-        //var m = document.getElementById('m').value;
-        //var n = document.getElementById('n').value; 	
-	worker.onmessage = function(event) {
-		document.getElementById('result').textContent = event.data;
-	};
-	//worker.postMessage( { 'm' : m, 'n' : n  } );
+        	var m = document.getElementById('m').value;
+	        var n = document.getElementById('n').value;
+
+		document.write('  <b>The result of the ackermann-function is</b>: <div id = "result" /> </div>');
+		var worker = new Worker('worker.js');
+		worker.postMessage( { 'm' : m, 'n' : n }  );
+		worker.onmessage = function(event) {
+			document.getElementById('result').textContent = event.data;
+		};
 	}
 
 	function nonWorker()
 	{
-	alert('hh');
-        document.write('  <b>The result of the ackermann-function is</b>: <div id = "result" /> </div>' );
-	//var m = document.getElementById('m').value;
-	//var n = document.getElementById('n').value;	
-	document.getElementById('result').textContent = ackermann2(4,4);
-
+       		var m = document.getElementById('m').value;
+        	var n = document.getElementById('n').value;  
+        	document.write('  <b>The result of the ackermann-function is</b>: <div id = "result" /> </div>' );	
+		document.getElementById('result').textContent = ackermann2(n,m);
 	 }
+
 </script>
 
  <body>
@@ -41,7 +41,7 @@
     <input type="button" name="Webworker button" value="Calc with Workers"
       onclick="webWorker()">
     <input type="button" name="button" value = "Calc without Workers" 
-	onclick=""nonWorker()">
+	onclick="nonWorker()">
  </body>
 </html>
 
