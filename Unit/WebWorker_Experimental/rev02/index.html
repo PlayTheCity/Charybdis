@@ -1,0 +1,32 @@
+
+<html>
+  <head>
+  <title>Charybdis Experimental WebWorkers Rev01</title>
+ </head>
+ 
+<script type = "text/javascript"  src = "threads.js" /> </script>
+<script type = "text/javascript" >
+
+	function webWorker()
+	{
+        	var threadingCalc = new Thread('worker.js');
+		threadingCalc.startThread();
+	}
+
+
+</script>
+
+ <body>
+  <h1> Web Workers Example with Ackermann-Function </h1> 
+  <hr> <br/> <br/> <br/>
+   <form>
+	N: <input id = 'n' type="text" name="n" /> <br/>
+        M: <input id = 'm' type="text" name="m" /> <br/>
+   </form> 
+
+    <input type="button" name="Webworker button" value="Calc with Workers"
+      onclick="webWorker()" />
+ </body>
+</html>
+
+

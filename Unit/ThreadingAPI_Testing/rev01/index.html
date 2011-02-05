@@ -1,0 +1,61 @@
+
+  <title>Charybdis - Experimental Threading API rev03 -</title>
+ </head>
+
+<script type = "text/javascript"  src = "Charybdis.Threading.Controller.js" /> </script>
+<script type = "text/javascript" >
+
+        var threadController = new ThreadController('worker.js',false);
+
+        function webWorker()
+        {
+                //var threadController = new ThreadController('worker.js');
+            	i threadController.startThread();
+                document.getElementById('Status').innerHTML = '<b>Status:</b> Running';
+                //threadController.callFunction('foofunc');
+        }
+
+        function stopWorker()
+        {
+                document.getElementById('Status').innerHTML = '<b>Status:</b> Stopped';
+                //threadController.stopThread();
+        }
+
+        function callFunction()
+        {
+                var functionname = document.getElementById("functions").options[document.getElementById("functions").selectedIndex].text;
+             //   alert(functionname);
+                document.getElementById('LastCalled').innerHTML = '<b>Last Called Function: </b>' + functionname;
+                //threadController.callFunction(functionname);
+        }
+
+
+</script>
+
+ <body>
+  <h1> Charybdis - Experimental Threading API rev03 - </h1>
+  <hr> <br/> <br/> <br/>
+
+        <h2> Thread Status </h2>
+    <div id = 'Status' name = 'Status' /><b>Status:</b> Stopped  </div>
+    <div id = 'LastCalled' name 'LastCalled' /> <b>Last Called Function: </b> None </div>
+        <h2> Thread Controller </h2>
+    <input type="button" name="Webworker button" value="Initialize WebWorker"
+      onclick="webWorker()" /> <br/> <br />
+         <input type="button" name="stop" value="Stop WebWorker"  onclick="stopWorker() " /> <br/> <br />
+
+
+<br/><br/><br/>
+<b> Available Functions </b>
+<br/>
+<form>
+<p>
+    <select id="functions" size="10">
+      <option>foofunc</option>
+    </select><br/><br/>
+</p>
+</form>
+    <input type="button" name="call" value="Call Function" onclick="callFunction()" /> <br/> <br />
+ </body>
+</html>
+
