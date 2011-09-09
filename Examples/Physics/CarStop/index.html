@@ -1,0 +1,373 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Bremsvorgang</title>
+    </head>
+    <body>
+    	
+		<script src="../../../Core/Charybdis.Core.Threading.js"></script>
+		<script src="../../../Core/Charybdis.Core.Objects.js"> </script>
+		<script src="../../../Core/Charybdis.Core.Graphics.js"> </script>
+		<script language="JavaScript">
+			
+			var canvasContext = false;
+			
+			var CarSpeed = 40 / 3.6;
+			var LKWSpeed = 40 / 3.6;
+
+			var CarAcc = 1.5 / 3.6;
+			var LKWAcc = 0.0;
+			var Time = 0;
+			
+			var CarPositionX = 0;
+			var CarPositionY = 0;
+			var LKWPositionX = 0;
+			var LKWPositionY = 0;
+			
+			var PixelPerMeter = 10;
+			
+			var InitialDistance = 10 *  PixelPerMeter;//10 == 100
+			var CarLength = 4 * PixelPerMeter;
+			var LKWLength = 16 * PixelPerMeter;
+			
+			var CarSpeedMax = 50 / 3.6;
+			var LKWSpeedMax = 50 / 3.6;
+			var CarWay = 0;
+			var LKWWay = 0;
+			var TargetY = 120;
+			var Finished = false;
+			var Return = false;
+			var Splash = false;
+			var Catched = false;
+			
+			var LKWRoundCounter = 0;
+			var CarRoundCounter = 0;
+			var Initialized = false;
+			
+			var GPositionX = 0;
+			var GSpeed = 40 / 3.6;
+			var GAcc = 1.5 / 3.6;
+			var GEnabled = false;
+			var GNumber = 1;
+			var GDistance = 0;
+			
+			var Collision = false;
+			
+			function initialize() {
+				      var canvas = document.getElementById("canvas");  
+				      if (canvas.getContext) {  
+				        var ctx = canvas.getContext("2d");
+				      	canvasContext = new CCCanvas(ctx);
+				      	canvasContext.InitializeScreen(1024,400);
+				      	canvasContext.SetClearColor(50,50,50);
+				      }
+			}
+
+			
+			function start() {
+				
+						Time = 0;
+						CarWay = 0;
+						LKWWay = 0;
+				
+						Splash = false;
+						Finished = false;
+						Splash = false;
+						Collision = false;
+						
+						LKWRoundCounter = 0;
+						CarRoundCounter = 0;
+						if ( !Initialized ) {
+						    setInterval(draw,10); 
+					      	setInterval(simulate,10);
+				      	
+				      		Initialized = true;
+				      	}
+				      	
+				      	CarPositionY = 400 / 4 * 3;
+				      	CarPositionX = 80;
+				      	
+				      	LKWPositionY = 400 / 4 * 3;
+				      	LKWPositionX = 80 + LKWLength + InitialDistance;
+				      	
+			}
+			
+						
+			function initSim() {
+				
+				CarSpeed = document.getElementById('Auto-Geschwindigkeit').value / 3.6;
+				LKWSpeed = document.getElementById('LKW-Geschwindigkeit').value / 3.6;
+				CarSpeedMax = document.getElementById('Auto-Maximale-Geschwindigkeit').value / 3.6;
+				LKWSpeedMax = document.getElementById('LKW-Maximale-Geschwindigkeit').value / 3.6;
+				LKWAcc = document.getElementById('LKW-Beschleunigung').value / 3.6;
+				CarAcc = document.getElementById('Auto-Beschleunigung').value / 3.6;
+				
+				
+			    GEnabled = document.getElementById("VerkehrErlauben").checked;
+			    if ( GEnabled ) {
+			    	GSpeed = document.getElementById("Gegenverkehr-Geschwindigkeit").value / 3.6;
+			    	GAcc = document.getElementById("Gegenverkehr-Beschleunigung").value / 3.6;
+			    	GPositionX = document.getElementById("Gegenverkehr-Distanz").value * PixelPerMeter;
+					GNumber = document.getElementById("AnzahlDerFahrzeuge").value / 3.6;
+					GDistance = GPositionX;
+				
+			    }
+			     
+				
+				start();	
+			}
+			
+			function collides(width,height,x,y) {
+				/* Links unten */
+				if ( CarPositionX  >= x && CarPositionY <= x + width) {
+					if ( CarPositionY >= y && CarPositionY <= y + height ) {
+						return true;
+					}
+				}
+				
+				return false;
+			}
+			
+			function simGegenverkehr() {
+				if ( GEnabled ) {
+					GPositionX -= (GSpeed * PixelPerMeter) / 100; 	
+					
+					if ( 0 > GPositionX ) {
+						if ( GNumber > 0 ) {
+							GNumber = GNumber - 1;
+							GPositionX = GDistance;
+						} else {
+							GEnabled = false;
+						}
+					}
+						
+					if ( collides(CarLength,40,GPositionX,120) ) {
+						Splash = true;
+						Collision = true;
+					}
+				}
+			}
+			
+			function drawGegenverkehr() {
+				if ( GEnabled )
+					canvasContext.FillRect(CarLength,40,GPositionX,120,255,255,0);
+			}
+			
+			function drawCar() {
+				canvasContext.FillRect(CarLength,40,CarPositionX,CarPositionY,155,155,155);
+			}
+			
+			function drawLKW() {
+				if ( !Catched )
+					canvasContext.FillRect(LKWLength,40,LKWPositionX,LKWPositionY,0,155,155);	
+			}
+			
+			function drawParallax() {
+				canvasContext.FillRect(10,10,(-CarPositionX),400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 100,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 200,400/15,255,255,255);		
+				canvasContext.FillRect(10,10,(-CarPositionX) + 300,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 400,400/15,255,255,255);					
+				canvasContext.FillRect(10,10,(-CarPositionX) + 500,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 600,400/15,255,255,255);		
+				canvasContext.FillRect(10,10,(-CarPositionX) + 700,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 800,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 900,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1000,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1100,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1200,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1300,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1400,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1500,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1600,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1700,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1800,400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1900,400/15,255,255,255);	
+				
+				
+				canvasContext.FillRect(10,10,(-CarPositionX),400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 100,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 200,400-400/15,255,255,255);		
+				canvasContext.FillRect(10,10,(-CarPositionX) + 300,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 400,400-400/15,255,255,255);					
+				canvasContext.FillRect(10,10,(-CarPositionX) + 500,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 600,400-400/15,255,255,255);		
+				canvasContext.FillRect(10,10,(-CarPositionX) + 700,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 800,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 900,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1000,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1100,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1200,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1300,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1400,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1500,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1600,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1700,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1800,400-400/15,255,255,255);	
+				canvasContext.FillRect(10,10,(-CarPositionX) + 1900,400-400/15,255,255,255);					
+			}
+			
+			function simulate() {
+				if (Splash)
+					return;
+				
+				Time += 0.01;
+				
+				simGegenverkehr();
+				
+				if ( CarPositionX > 1024 ) {
+					CarRoundCounter += 1;
+					CarPositionX = -CarLength;
+					
+					if ( GEnabled ) {
+						GPositionX = GDistance;
+					}
+				}
+				
+				if ( LKWPositionX > 1024 ) {
+					LKWRoundCounter += 1;
+					LKWPositionX = -LKWLength;
+				}
+				
+				if ( LKWPositionX > 0 ) {
+					
+				}
+				
+				if ( (CarWay * PixelPerMeter - InitialDistance) > (LKWWay * PixelPerMeter) + (LKWLength * 2 )  && CarPositionY <= 120 ) {
+					Finished = false;
+					Return = true;
+				} 
+				
+				if ( CarPositionY <= 120 )
+					Finished = true;
+				
+				if ( Finished == false ) {
+					CarPositionY -= (CarSpeed * PixelPerMeter) / 800;
+				}
+				
+				if ( Return && CarPositionY >= 400 / 4 * 3)
+				{
+					Return = false;
+					Splash = true;
+				}
+				
+				if (  Return == true ) {
+					Finished = true;
+					CarPositionY += (CarSpeed * PixelPerMeter) / 800;
+				}
+				
+				CarWay += (CarSpeed ) / 100;
+				CarPositionX += (CarSpeed * PixelPerMeter) / 100;
+				if ( CarSpeedMax > CarSpeed)
+					CarSpeed += CarAcc / 100;
+					
+				LKWWay += (LKWSpeed ) / 100;
+				LKWPositionX += (LKWSpeed * PixelPerMeter) / 100;
+				if ( LKWSpeedMax > LKWSpeed )
+					LKWSpeed += LKWAcc / 100;
+				
+				if ( CarRoundCounter > LKWRoundCounter ) {
+					Catched = true
+				} else {
+					Catched = false;
+				}
+			}
+			
+			function drawStreet() {
+				canvasContext.FillRect(1024,45,0,0,60,255,0);
+				canvasContext.FillRect(1024,45,0,400-45,60,255,0);
+				
+				canvasContext.FillRect(50,5,0,400/2,255,255,255);
+				canvasContext.FillRect(50,5,150,400/2,255,255,255);
+				canvasContext.FillRect(50,5,300,400/2,255,255,255);
+				canvasContext.FillRect(50,5,450,400/2,255,255,255);
+				canvasContext.FillRect(50,5,600,400/2,255,255,255);
+				canvasContext.FillRect(50,5,750,400/2,255,255,255);
+				canvasContext.FillRect(50,5,900,400/2,255,255,255);
+			}
+			
+			function drawOverlay() {
+				canvasContext.TextOut("G von Auto: " + (CarSpeed * 3.6) ,50,20,0,0,0,14);
+				canvasContext.TextOut("Zeit: " + Time,600,20,0,0,0,14);
+				canvasContext.TextOut("Weg des Autos: " + CarWay,100,120,0,0,0,9);
+				canvasContext.TextOut("Weg des LKWs: " + LKWWay,100,150,0,0,0,9);
+			}
+			
+			function drawSplash() {
+				if ( Collision ) {
+					canvasContext.TextOut("Kollision mit dem Gegenverkehr!" ,50,100,0,0,0,40);	
+				}
+				canvasContext.TextOut("G von Auto: " + (CarSpeed * 3.6) ,50,150,0,0,0,14);
+				canvasContext.TextOut("Zeit: " + Time,50,200,0,0,0,14);
+				canvasContext.TextOut("Weg des Autos: " + CarWay,50,250,0,0,0,14);
+				canvasContext.TextOut("Weg des LKWs: " + LKWWay,50,300,0,0,0,14);
+			}
+			
+			function draw() {
+				canvasContext.ClearScreen();
+				
+				if ( !Splash ) {
+					canvasContext.SetClearColor(50,50,50);
+					drawStreet();
+					drawCar();
+					drawLKW();
+					drawGegenverkehr();
+					drawParallax();
+					drawOverlay();
+				} else {
+					setTimeout(0,simulate);
+					setTimeout(0,draw);
+					if ( Collision)
+						canvasContext.SetClearColor(255,0,0);
+					else
+						canvasContext.SetClearColor(255,255,255);
+					drawSplash();
+				}
+			}
+			
+			
+		</script>
+		
+		
+		
+        <h1>Überholen</h1>
+        
+		 <body onload="initialize();">  
+		   <canvas id="canvas" width="1024" height="400"></canvas>  
+		 <form>
+		  <p><h1>Simulation</h1>
+		    <h3> Fahrzeuge </h3>
+		    Auto-Geschwindigkeit: 	       <input type="text" id="Auto-Geschwindigkeit" value="90"/> <br />
+		    LKW-Geschwindigkeit:           <input type="text" id="LKW-Geschwindigkeit"  value="60"/><br />
+		    Maximale Auto-Geschwindigkeit: <input type="text" id="Auto-Maximale-Geschwindigkeit" value="90"/><br />
+		    Maximale LKW-Geschwindigkeit:  <input type="text" id="LKW-Maximale-Geschwindigkeit" value="60"/><br />
+		    Auto-Beschleunigung:           <input type="text" id="Auto-Beschleunigung" value="0"/><br />
+		    LKW-Beschleunigung:            <input type="text" id="LKW-Beschleunigung" value="0"/><br /><br />
+		    <h3> Verkehr </h3>
+		    Verkehr erlauben: <input type="checkbox" id="VerkehrErlauben"/> <br />
+		    Gegenverkehr-Geschwindigkeit: <input type="input" id="Gegenverkehr-Geschwindigkeit" value="90" /> <br />
+		    Gegenverkehr-Beschleunigung: <input type="input" id="Gegenverkehr-Beschleunigung" value="0" /> <br />
+		    Gegenverkehr-Distanz: <input type="input" id="Gegenverkehr-Distanz" value="150" /> <br />
+		    Anzahl der Fahrzeuge: <input type="inptu" id="AnzahlDerFahrzeuge" value="1" /> <br />		    
+		    <br /><br />
+		    <input type="button" value="Start" onclick="initSim();"/><br/>	
+		    
+		    <hr>
+		    <h2>Vorschriften</h2>
+		    <br/>
+		    <b>1. Abstand zwischen Auto und LKW:<br/> </b>
+		    Das Auto wechselt wieder die Fahrbahn, wenn das es mindestens 2x Länge des LKWs vor dem LKW fährt.<br/><br/>
+		    <b>2. Start des Vorgangs: <br/> </b>
+		    Das Überholmaneveur startet direkt nach dem Klick auf den "Start"-Button.<br/><br/>
+		    <b>3. Beschleunigung: <br/> </b>
+		    Die Beschleunigung der einzelnen Fahrzeuge ist immer konstant.<br/><br/>		    
+		  </p>
+		</form>
+		 
+		 </body> 
+		 
+    </body>
+</html>
+             

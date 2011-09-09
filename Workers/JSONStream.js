@@ -22,7 +22,7 @@ function removeKey( fKey )
 		SourceString += "['"+ KeyArray[i] + "']";
 	}
 	
-	SourceString += ";";
+	SourceString += ";"; 
 	eval(SourceString);
 	
 }
